@@ -9,16 +9,22 @@ email_two = {
     "subject": "Weekly campus events",
     "body": "Here are the clubs and talks happening this week on campus."
 }
-emails = [email,email_two]
 def triage(email):
-    score = 0
+    reasons = []
     if "Urgent" in email["subject"]:
-        score = score + 1
+        reasons.append("Urgent wording in subject")
     if "verify" in email["body"]:
-        score = score + 1
-    return score
+        reasons.append("Asks you to verify something")
+    domain = email["sender"].split("@")[1]
+    if "-" in domain:
+        reasons.append("Suspicious sender domain: " + domain)
+    if "locked" in email["body"].lower() or "locked" in email["subject"].lower():
+        reasons.append("Threatens the account will be locked")
+    return reasons
+emails = [email, email_two]
 for email in emails:
-    score = triage(email)
+    reasons = triage(email)
+    score = len(reasons)
     if score == 0:
         verdict = "SAFE"
     elif score == 1:
@@ -29,3 +35,6 @@ for email in emails:
     print(f"Subject: {email['subject']}")
     print(f"Risk Score: {score}")
     print(f"Verdict: {verdict}")
+    for reason in reasons:
+        print(f"  - {reason}")
+    print("")
